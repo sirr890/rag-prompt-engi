@@ -37,10 +37,10 @@ def clean_text(text):
     text = text.lower()
     text = re.sub(r"https?://\S+|www\.\S+", "", text)  # Remove URLs
     text = re.sub(r"\S+@\S+\.\S+", "", text)  # Remove emails
-    text = re.sub(r"\s+", " ", text).strip()  # Normalize spaces
-    text = re.sub(
-        r"[^\w\s,.!?-]", "", text
-    )  # Keep only letters, numbers, and basic punctuation
+    # text = re.sub(r"\s+", " ", text).strip()  # Normalize spaces
+    # text = re.sub(
+    # r"[^\w\s,.!?-]", "", text
+    # )  # Keep only letters, numbers, and basic punctuation
     return text
 
 

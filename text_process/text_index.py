@@ -39,15 +39,12 @@ class Indexfaiss:
 
         return embeddings, list(documents.keys())
 
-    def index_embeddings(self, embeddings, document_names, faiss_path, metadata_path):
+    def index_embeddings(self, embeddings):
         """
-        Indexes embeddings in FAISS and saves metadata for retrieval.
+        Indexes embeddings in FAISS
 
         Args:
             embeddings (np.array): Numpy array of document embeddings.
-            document_names (list): List of document names corresponding to embeddings.
-            faiss_path (str): Path to save FAISS index.
-            metadata_path (str): Path to save metadata (document names).
         """
         try:
             # Initialize FAISS index
@@ -56,18 +53,38 @@ class Indexfaiss:
             # Add embeddings to the index
             index.add(embeddings)
 
-            # Save FAISS index
-            faiss.write_index(index, faiss_path)
-            print(f"✅ FAISS index saved at {faiss_path}.")
-
-            # Save metadata (document names)
-            with open(metadata_path, "w", encoding="utf-8") as f:
-                json.dump(document_names, f, ensure_ascii=False, indent=4)
-
-            print(f"✅ Metadata saved at {metadata_path}.")
-
+            return index
         except Exception as e:
             print(f"❌ Error during FAISS indexing: {str(e)}")
+
+    def save_index(self, path_index, index):
+        """
+        Saves a FAISS index to a file.
+
+        Args:
+            path_index (str): Path to save the FAISS index.
+            index (faiss.Index): FAISS index to save.
+        """
+        try:
+            faiss.write_index(index, path_index)
+            print(f"✅ FAISS index saved at {path_index}.")
+        except Exception as e:
+            print(f"❌ Error saving FAISS index: {str(e)}")
+
+    def save_metadata(self, path_metadata, documents):
+        """
+        Saves document metadata to a file.
+
+        Args:
+            path_metadata (str): Path to save the metadata file.
+            documents (list): List of document names.
+        """
+        try:
+            with open(path_metadata, "w", encoding="utf-8") as f:
+                json.dump(documents, f, ensure_ascii=False, indent=4)
+            print(f"✅ Metadata saved at {path_metadata}.")
+        except Exception as e:
+            print(f"❌ Error saving metadata: {str(e)}")
 
     def load_index(self, index_path):
         """
@@ -111,22 +128,19 @@ class Indexfaiss:
             print(f"❌ Error loading metadata: {str(e)}")
             return []
 
-    def search_similar_documents(self, query, index_path, metadata_path, num_results=5):
+    def search_similar_documents(self, query, index, document_names, num_results=5):
         """
         Searches for the most similar documents to a given query.
 
         Args:
             query (str): The query string.
-            index_path (str): Path to the FAISS index file.
-            metadata_path (str): Path to the metadata file containing document names.
+            index (str): FAISS index.
+            metadata (str): Metadata containing document names.
             num_results (int): Number of top similar documents to retrieve.
 
         Returns:
             list[dict]: A list of dictionaries containing document names and their similarity distances.
         """
-        # ✅ Load FAISS index and metadata
-        index = self.load_index(index_path)
-        document_names = self.load_metadata(metadata_path)
 
         if index is None or not document_names:
             return []

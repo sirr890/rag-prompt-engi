@@ -22,6 +22,7 @@ def query_ollama(query, context, model="llama3.2", temperature=0.9):
                     },
                 ],
                 "temperature": temperature,
+                "stream": False,
             },
         )
 
@@ -57,16 +58,15 @@ if __name__ == "__main__":
     # ✅ Generate embeddings
     print("\n🔄 Generating embeddings...")
     embeddings, document_names = indexfaiss.generate_embeddings(documents)
-    indexfaiss.index_embeddings(
+    faiss_path, metadata_path = "faiss_index.index", "metadata.json"
+    index = indexfaiss.index_embeddings(
         embeddings,
-        document_names,
-        faiss_path="faiss_index.index",
-        metadata_path="metadata.json",
     )
+    indexfaiss.save_index(faiss_path, index)
+    indexfaiss.save_metadata(metadata_path, document_names)
     print("✅ FAISS index and metadata saved.")
 
     # ✅ Example Query
-    # query = "taux de présence des immigrants de cuba au Québec entre 2012 et 2021."
     # query = "Parmi les personnes admises de 2012 à 2021, dit-moi taux de Cuba en 2023 qui dépasse le seuil de 80"
     query = "programme pilot intelligence artificielle"
     print(f"\n🔍 Searching for documents related to: '{query}'")
@@ -79,8 +79,11 @@ if __name__ == "__main__":
 
     # ✅ Search for similar documents
     try:
+        # ✅ Load FAISS index and metadata
+        index = indexfaiss.load_index(faiss_path)
+        document_names = indexfaiss.load_metadata(metadata_path)
         similar_documents = indexfaiss.search_similar_documents(
-            query, "faiss_index.index", "metadata.json", num_results=4
+            query, index, document_names, num_results=4
         )
 
         if not similar_documents:
