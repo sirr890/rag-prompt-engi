@@ -23,7 +23,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
-def delete_all_pdfs():
+def delete_all_files():
     for filename in os.listdir(UPLOAD_FOLDER):
         file_path = os.path.join(UPLOAD_FOLDER, filename)
         try:
@@ -31,6 +31,17 @@ def delete_all_pdfs():
                 os.unlink(file_path)
         except Exception as e:
             print(f"Error deleting {file_path}: {e}")
+
+
+def delete_all_pdfs():
+    for filename in os.listdir(UPLOAD_FOLDER):
+        if filename.endswith(".pdf"):
+            file_path = os.path.join(UPLOAD_FOLDER, filename)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception as e:
+                print(f"Error deleting {file_path}: {e}")
 
 
 def upload_all_pdfs():
@@ -53,7 +64,7 @@ def upload_all_pdfs():
 @app.route("/upload_pdfs", methods=["POST"])
 def upload_pdfs():
     # delete all files from UPLOAD_FOLDER
-    delete_all_pdfs()
+    delete_all_files()
 
     # Upload all files
     response, tuple = upload_all_pdfs()  # Subir los PDFs
@@ -81,6 +92,7 @@ def upload_pdfs():
     indexfaiss.save_index(faiss_path, index)
     indexfaiss.save_metadata(metadata_path, document_names)
     print(f"✅ FAISS index and metadata saved.")
+    delete_all_pdfs()
     return (
         jsonify(
             {
@@ -143,4 +155,5 @@ def query():
 
 
 if __name__ == "__main__":
+    delete_all_files()  # Borra los archivos temporales en caso de que se corra el script de nuevo
     app.run(debug=True)
