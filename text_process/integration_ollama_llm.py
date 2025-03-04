@@ -1,7 +1,8 @@
 import requests
-from text_index import Indexfaiss
-from text_extraction import TextExtractor
-from text_extraction import clean_text
+
+# from text_index import Indexfaiss
+# from text_extraction import TextExtractor
+# from text_extraction import clean_text
 
 
 def query_ollama(query, context, model="llama3.2", temperature=0.9):
@@ -39,82 +40,82 @@ def query_ollama(query, context, model="llama3.2", temperature=0.9):
         return f"❌ Connection error querying Ollama: {str(e)}"
 
 
-if __name__ == "__main__":
-    # ✅ Initialize TextExtractor
-    extractor = TextExtractor(chunk_size=1000, overlap=500)
-    indexfaiss = Indexfaiss()
+# if __name__ == "__main__":
+#     # ✅ Initialize TextExtractor
+#     extractor = TextExtractor(chunk_size=1000, overlap=500)
+#     indexfaiss = Indexfaiss()
 
-    # ✅ Load documents from PDFs, URLs, and Local HTML files
-    print("\n🔄 Extracting text from PDFs...")
-    pdf_directory = "data"
-    documents = extractor.extract_text_from_pdf_directory(pdf_directory)
+#     # ✅ Load documents from PDFs, URLs, and Local HTML files
+#     print("\n🔄 Extracting text from PDFs...")
+#     pdf_directory = "data"
+#     documents = extractor.extract_text_from_pdf_directory(pdf_directory)
 
-    print("\n🔄 Extracting text from online URLs...")
-    # local_documents = extractor.extract_text_from_local_html("data/sites_local.json")
+#     print("\n🔄 Extracting text from online URLs...")
+#     # local_documents = extractor.extract_text_from_local_html("data/sites_local.json")
 
-    # documents.update(local_documents)
-    print("\n✅ All documents extracted.")
+#     # documents.update(local_documents)
+#     print("\n✅ All documents extracted.")
 
-    # ✅ Generate embeddings
-    print("\n🔄 Generating embeddings...")
-    embeddings, document_names = indexfaiss.generate_embeddings(documents)
-    faiss_path, metadata_path = "faiss_index.index", "metadata.json"
-    index = indexfaiss.index_embeddings(
-        embeddings,
-    )
-    indexfaiss.save_index(faiss_path, index)
-    indexfaiss.save_metadata(metadata_path, document_names)
-    print("✅ FAISS index and metadata saved.")
+#     # ✅ Generate embeddings
+#     print("\n🔄 Generating embeddings...")
+#     embeddings, document_names = indexfaiss.generate_embeddings(documents)
+#     faiss_path, metadata_path = "faiss_index.index", "metadata.json"
+#     index = indexfaiss.index_embeddings(
+#         embeddings,
+#     )
+#     indexfaiss.save_index(faiss_path, index)
+#     indexfaiss.save_metadata(metadata_path, document_names)
+#     print("✅ FAISS index and metadata saved.")
 
-    # ✅ Example Query
-    # query = "Parmi les personnes admises de 2012 à 2021, dit-moi taux de Cuba en 2023 qui dépasse le seuil de 80"
-    query = "programme pilot intelligence artificielle"
-    print(f"\n🔍 Searching for documents related to: '{query}'")
+#     # ✅ Example Query
+#     # query = "Parmi les personnes admises de 2012 à 2021, dit-moi taux de Cuba en 2023 qui dépasse le seuil de 80"
+#     query = "programme pilot intelligence artificielle"
+#     print(f"\n🔍 Searching for documents related to: '{query}'")
 
-    # # ✅ Clean query text if needed
-    # if "clean_text" in globals():
-    #     query = clean_text(query)
-    # else:
-    #     print("⚠ Warning: `clean_text` function not found. Using raw query.")
+#     # # ✅ Clean query text if needed
+#     # if "clean_text" in globals():
+#     #     query = clean_text(query)
+#     # else:
+#     #     print("⚠ Warning: `clean_text` function not found. Using raw query.")
 
-    # ✅ Search for similar documents
-    try:
-        # ✅ Load FAISS index and metadata
-        index = indexfaiss.load_index(faiss_path)
-        document_names = indexfaiss.load_metadata(metadata_path)
-        similar_documents = indexfaiss.search_similar_documents(
-            query, index, document_names, num_results=4
-        )
+#     # ✅ Search for similar documents
+#     try:
+#         # ✅ Load FAISS index and metadata
+#         index = indexfaiss.load_index(faiss_path)
+#         document_names = indexfaiss.load_metadata(metadata_path)
+#         similar_documents = indexfaiss.search_similar_documents(
+#             query, index, document_names, num_results=4
+#         )
 
-        if not similar_documents:
-            print("⚠ No similar documents found.")
-        else:
-            # ✅ Display search results
-            print(
-                f"\n📌 Top {len(similar_documents)} similar documents to '{query}':\n"
-            )
-            for idx, doc in enumerate(similar_documents):
-                print(
-                    f"🔹 {idx + 1}. Document: {doc['document_chunk']} | Distance: {doc['distance']:.4f}"
-                )
+#         if not similar_documents:
+#             print("⚠ No similar documents found.")
+#         else:
+#             # ✅ Display search results
+#             print(
+#                 f"\n📌 Top {len(similar_documents)} similar documents to '{query}':\n"
+#             )
+#             for idx, doc in enumerate(similar_documents):
+#                 print(
+#                     f"🔹 {idx + 1}. Document: {doc['document_chunk']} | Distance: {doc['distance']:.4f}"
+#                 )
 
-            # ✅ Retrieve context from similar documents
-            retrieved_texts = "\n\n".join(
-                [
-                    documents.get(doc["document_chunk"], "⚠ Document not found.")
-                    for doc in similar_documents
-                ]
-            )
+#             # ✅ Retrieve context from similar documents
+#             retrieved_texts = "\n\n".join(
+#                 [
+#                     documents.get(doc["document_chunk"], "⚠ Document not found.")
+#                     for doc in similar_documents
+#                 ]
+#             )
 
-            # ✅ Query Ollama with retrieved context
-            print("\n🤖 Querying Ollama for response...")
-            print(query, retrieved_texts)
-            ollama_response = query_ollama(
-                query, retrieved_texts
-            )  # , model="deepseek-r1")
+#             # ✅ Query Ollama with retrieved context
+#             print("\n🤖 Querying Ollama for response...")
+#             print(query, retrieved_texts)
+#             ollama_response = query_ollama(
+#                 query, retrieved_texts
+#             )  # , model="deepseek-r1")
 
-            print("\n📌 Ollama Response:\n")
-            print(ollama_response)
+#             print("\n📌 Ollama Response:\n")
+#             print(ollama_response)
 
-    except Exception as e:
-        print(f"❌ Error during search: {str(e)}")
+#     except Exception as e:
+#         print(f"❌ Error during search: {str(e)}")
